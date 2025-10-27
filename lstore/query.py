@@ -81,17 +81,23 @@ class Query:
     # this function is only called on the primary key.
     # Returns the summation of the given range upon success
     # Returns False if no record exists in the given range
-    """ #this one
+    """ #fix return False error handling (if empty record)
     def sum(self, start_range, end_range, aggregate_column_index):
-        i = start_range
         output = 0
+        x = 0
+        for i in range(1, end_range - start_range + 1) :
+            if self.table.page_directory[i] == None:
+                x += 1
+        if x == (end_range - start_range + 1):
+            print(x, "\n")
+            return False
         
-        while i < end_range:
-            rid = Table.page_directory[i]
-            output += Table.read_column(aggregate_column_index, rid[0], rid[1])
-            i += 1
-        
-        return True
+        while start_range <= end_range:
+            rid = self.table.page_directory[start_range]
+            output += self.table.read_column(aggregate_column_index, rid[0], rid[1])
+            start_range += 1 
+        print(output)
+        return output
 
     
     """
@@ -123,11 +129,19 @@ class Query:
             u = self.update(key, *updated_columns)
             return u
         return False
+    
+
 
 def main():
-    test = Table("students", 1, 0)
-    test.insert_row(1)
-    sum(0,2,0)
+    test = Table("students", 2, 1)
+    test.insert_row([0, 123])
+    test.insert_row([1, 1000])
+    test.insert_row([2, 10000])
+    test.insert_row([3, 100000])
+    test.insert_row([4, 1000000])
+    Qobj = Query(test)
+    
+    Qobj.sum(1,4,1)
     return True
 
 main()

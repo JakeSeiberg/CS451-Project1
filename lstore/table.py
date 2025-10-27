@@ -41,7 +41,6 @@ class Table:
                 new_page = Page()
                 self.base_page[i].append(new_page)
                 current_page = new_page
-            print(value)
             current_page.write(value)
             page_index = len(self.base_page[i])-1
             record_offset = self.base_page[i][-1].num_records - 1
