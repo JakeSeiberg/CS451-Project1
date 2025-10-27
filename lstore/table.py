@@ -29,20 +29,27 @@ class Table:
         self.page_directory = {}
         self.index = Index(self)
         self.base_page = [[Page()] for _ in range(num_columns)]
-        self.tail_pages = []
-        self.rid_counter = 1
+        self.rid_counter = 0
         pass
     def insert_row(self, columns):
-        rid = self.table[columns]
+        rid = self.rid_counter + 1
+        self.rid_counter += 1
+   
         for i, value in enumerate(columns):
             current_page = self.base_page[i][-1]
             if not current_page.has_capacity:
                 new_page = Page()
                 self.base_page[i].append(new_page)
                 current_page = new_page
-            current_page.write(columns)
+            print(value)
+            current_page.write(value)
+            page_index = len(self.base_page[i])-1
+            record_offset = self.base_page[i][-1].num_records - 1
+            self.page_directory[rid] = (page_index,record_offset)
         
-        self.rid_counter += 1
+    def read_column(self,col_idx, page_idx, slot_idx):
+        page = self.base_page[col_idx] [page_idx]
+        return page.read(slot_idx)
         
 
     def __merge(self):

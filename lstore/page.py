@@ -16,4 +16,8 @@ class Page:
             return True
         else:
             return False
+    def read(self, slot):
+        offset = 8 * slot
+        data_bytes = self.data[offset:offset+8]
+        return int.from_bytes(data_bytes,byteorder='little', signed=True)
 
