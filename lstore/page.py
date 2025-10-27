@@ -15,9 +15,5 @@ class Page:
             self.num_records += 1
             return True
         else:
-<<<<<<< HEAD
-            self.has_capacity(self.num_records)
-=======
             return False
->>>>>>> db83bd5c575d457069982af72a818491d50e8fcc
 
