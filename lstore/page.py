@@ -10,8 +10,8 @@ class Page:
 
     def write(self, value):
         if self.has_capacity(self.num_records):
-            offset = self.num_records
-            self.data[offset] = value
+            offset = self.num_records * 8
+            self.data[offset:offset + 8] = value.to_bytes(8, byteorder='little', signed=True)
             self.num_records += 1
             return True
         else:
