@@ -15,7 +15,7 @@ class Page:
     def write(self, value):
         if self.num_records <= 512:
             self.data.append(value)
-            self.num_records += 1:
+            self.num_records += 1
         else:
-            has_capacity()
+            has_capacity(self.num_records)
 
