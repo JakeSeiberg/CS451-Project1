@@ -6,16 +6,14 @@ class Page:
         self.data = bytearray(4096)
 
     def has_capacity(self, num):
-        if num >= 512:
-            return False
-        else:
-            return True
-
+        return self.num_records < 512
 
     def write(self, value):
-        if self.num_records <= 512:
-            self.data.append(value)
+        if self.has_capacity(self.num_records):
+            offset = self.num_records
+            self.data[offset] = value
             self.num_records += 1
+            return True
         else:
-            has_capacity(self.num_records)
+            return False
 
