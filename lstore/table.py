@@ -27,7 +27,14 @@ class Table:
         self.num_columns = num_columns
         self.page_directory = {}
         self.index = Index(self)
+        self.base_page = []
+        self.tail_pages = []
+        self.rid_counter = 1
         pass
+    def insert_row(self, columns):
+        rid = self.table[columns]
+        self.rid_counter += 1
+        
 
     def __merge(self):
         print("merge is happening")

@@ -5,10 +5,17 @@ class Page:
         self.num_records = 0
         self.data = bytearray(4096)
 
-    def has_capacity(self):
-        pass
+    def has_capacity(self, num):
+        if num >= 512:
+            return False
+        else:
+            return True
+
 
     def write(self, value):
-        self.num_records += 1
-        pass
+        if self.num_records <= 512:
+            self.data.append(value)
+            self.num_records += 1:
+        else:
+            has_capacity()
 
