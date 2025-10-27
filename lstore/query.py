@@ -23,6 +23,7 @@ class Query:
     def delete(self, primary_key):
         
         if True:
+            self.table.page_directory[primary_key]
             return True
         else:
             return False
@@ -74,30 +75,7 @@ class Query:
         pass
 
     
-    """
-    :param start_range: int         # Start of the key range to aggregate 
-    :param end_range: int           # End of the key range to aggregate 
-    :param aggregate_columns: int  # Index of desired column to aggregate
-    # this function is only called on the primary key.
-    # Returns the summation of the given range upon success
-    # Returns False if no record exists in the given range
-    """ #fix return False error handling (if empty record)
-    def sum(self, start_range, end_range, aggregate_column_index):
-        output = 0
-        x = 0
-        for i in range(1, end_range - start_range + 1) :
-            if self.table.page_directory[i] == None:
-                x += 1
-        if x == (end_range - start_range + 1):
-            print(x, "\n")
-            return False
-        
-        while start_range <= end_range:
-            rid = self.table.page_directory[start_range]
-            output += self.table.read_column(aggregate_column_index, rid[0], rid[1])
-            start_range += 1 
-        print(output)
-        return output
+
 
     
     """
@@ -130,8 +108,33 @@ class Query:
             return u
         return False
     
+    """
+    :param start_range: int         # Start of the key range to aggregate 
+    :param end_range: int           # End of the key range to aggregate 
+    :param aggregate_columns: int  # Index of desired column to aggregate
+    # this function is only called on the primary key.
+    # Returns the summation of the given range upon success
+    # Returns False if no record exists in the given range
+    """ #fix return False error handling (if empty record)
+    def sum(self, start_range, end_range, aggregate_column_index):
+        output = 0
+        found = False
+        for rid in range(start_range, end_range + 1):
+            if rid not in self.table.page_directory:
+                continue
+            found = True
+            
+            page_index, record_offset = self.table.page_directory[rid]
+            value = self.table.read_column(aggregate_column_index, page_index, record_offset)
+            output += value
 
+        if not found:
+            return False
+        
+        print(output)
+        return output
 
+"""
 def main():
     test = Table("students", 2, 1)
     test.insert_row([0, 123])
@@ -145,3 +148,4 @@ def main():
     return True
 
 main()
+"""
