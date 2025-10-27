@@ -1,5 +1,6 @@
 from lstore.index import Index
 from time import time
+from lstore.page import Page
 
 INDIRECTION_COLUMN = 0
 RID_COLUMN = 1
@@ -39,7 +40,7 @@ class Table:
                 new_page = Page()
                 self.base_page[i].append(new_page)
                 current_page = new_page
-            current_page.write(column)
+            current_page.write(columns)
         
         self.rid_counter += 1
         
