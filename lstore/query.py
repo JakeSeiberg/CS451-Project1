@@ -1,5 +1,5 @@
-from lstore.table import Table, Record
-from lstore.index import Index
+from table import Table, Record
+from index import Index
 
 
 class Query:
@@ -19,19 +19,23 @@ class Query:
     # Read a record with specified RID
     # Returns True upon succesful deletion
     # Return False if record doesn't exist or is locked due to 2PL
-    """
+    """ #this one
     def delete(self, primary_key):
-        pass
+        
+        if True:
+            return True
+        else:
+            return False
     
     
     """
     # Insert a record with specified columns
     # Return True upon succesful insertion
     # Returns False if insert fails for whatever reason
-    """
+    """ #this one
     def insert(self, *columns):
         schema_encoding = '0' * self.table.num_columns
-        pass
+        return
 
     
     """
@@ -42,7 +46,7 @@ class Query:
     # Returns a list of Record objects upon success
     # Returns False if record locked by TPL
     # Assume that select will never be called on a key that doesn't exist
-    """
+    """ #this one
     def select(self, search_key, search_key_index, projected_columns_index):
         pass
 
@@ -56,7 +60,7 @@ class Query:
     # Returns a list of Record objects upon success
     # Returns False if record locked by TPL
     # Assume that select will never be called on a key that doesn't exist
-    """
+    """ #maybe this one
     def select_version(self, search_key, search_key_index, projected_columns_index, relative_version):
         pass
 
@@ -65,7 +69,7 @@ class Query:
     # Update a record with specified key and columns
     # Returns True if update is succesful
     # Returns False if no records exist with given key or if the target record cannot be accessed due to 2PL locking
-    """
+    """ #this one
     def update(self, primary_key, *columns):
         pass
 
@@ -77,9 +81,17 @@ class Query:
     # this function is only called on the primary key.
     # Returns the summation of the given range upon success
     # Returns False if no record exists in the given range
-    """
+    """ #this one
     def sum(self, start_range, end_range, aggregate_column_index):
-        pass
+        i = start_range
+        output = 0
+        
+        while i < end_range:
+            rid = Table.page_directory[i]
+            output += Table.read_column(aggregate_column_index, rid[0], rid[1])
+            i += 1
+        
+        return True
 
     
     """
@@ -111,3 +123,11 @@ class Query:
             u = self.update(key, *updated_columns)
             return u
         return False
+
+def main():
+    test = Table("students", 1, 0)
+    test.insert_row(1)
+    sum(0,2,0)
+    return True
+
+main()
