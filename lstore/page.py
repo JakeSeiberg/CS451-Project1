@@ -17,5 +17,5 @@ class Page:
             self.data.append(value)
             self.num_records += 1
         else:
-            has_capacity(self.num_records)
+            self.has_capacity(self.num_records)
 
