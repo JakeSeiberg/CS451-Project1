@@ -45,6 +45,7 @@ class Table:
             page_index = len(self.base_page[i])-1
             record_offset = self.base_page[i][-1].num_records - 1
             self.page_directory[rid] = (page_index,record_offset)
+            record = Record(rid, i, current_page)
         
     def read_column(self,col_idx, page_idx, slot_idx):
         page = self.base_page[col_idx] [page_idx]
