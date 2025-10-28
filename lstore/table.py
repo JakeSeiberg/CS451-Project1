@@ -1,6 +1,6 @@
-from index import Index
+from lstore.index import Index
 from time import time
-from page import Page
+from lstore.page import Page
 
 INDIRECTION_COLUMN = 0
 RID_COLUMN = 1
