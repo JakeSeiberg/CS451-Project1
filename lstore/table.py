@@ -29,7 +29,9 @@ class Table:
         self.page_directory = {}
         self.index = Index(self)
         self.base_page = [[Page()] for _ in range(num_columns)]
+        self.tail_page = [[Page()] for _ in range(num_columns)]
         self.rid_counter = 0
+        self.version_chain = {}
 
         self.index.create_index(self.key)
 
