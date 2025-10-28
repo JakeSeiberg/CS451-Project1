@@ -57,7 +57,7 @@ class BPlusTree:
             new_root = Node(self.order)
             new_root.is_leaf = False
             new_root.children.append(self.root)
-            self.split_child(new_root, 0)
+            self._split_child(new_root, 0)
             self.root = new_root
 
         self.insert_non_full(self.root, key, rid)
@@ -80,7 +80,7 @@ class BPlusTree:
                 if key >= node.keys[i]:
                     i += 1
 
-            self._insert_non_full(node.children[i], key, rid)
+            self.insert_non_full(node.children[i], key, rid)
         
     def _split_child(self, parent, index):
         node = parent.children[index]
@@ -139,4 +139,31 @@ class Node:
         self.children = []
         self.is_leaf = True
         self.next = None
+        
+def main():
+    print("Running basic B+ Tree insert tests...\n")
+
+    tree = BPlusTree(order=4)
+    tree.insert(10, "rid10")
+    print("Test 1 - Single insert:")
+    print("Root keys:", tree.root.keys)
+    assert tree.root.keys == [(10, "rid10")]
+    print("Passed\n")
+    tree = BPlusTree(order=4)
+    for k, rid in [(5, "r5"), (2, "r2"), (8, "r8")]:
+        tree.insert(k, rid)
+    print("Test 2 - Multiple inserts (no split):")
+    print("Root keys:", tree.root.keys)
+    assert [k for k, _ in tree.root.keys] == [2, 5, 8]
+    print("Passed\n")
+    tree = BPlusTree(order=4)
+    for k in [1, 2, 3, 4, 5]:
+        tree.insert(k, f"rid{k}")
+    print("Test 3 - Insert causing split:")
+    print("Root keys:", tree.root.keys)
+    print("Children count:", len(tree.root.children))
+    assert not tree.root.is_leaf
+    assert len(tree.root.children) == 2
+    print("Passed\n")
+main()
         
