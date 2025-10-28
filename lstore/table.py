@@ -30,10 +30,11 @@ class Table:
         self.index = Index(self)
         self.base_page = [[Page()] for _ in range(num_columns)]
         self.rid_counter = 0
-        pass
+
     def insert_row(self, columns):
         rid = self.rid_counter + 1
         self.rid_counter += 1
+        page_positions = []
    
         for i, value in enumerate(columns):
             current_page = self.base_page[i][-1]
@@ -44,8 +45,12 @@ class Table:
             current_page.write(value)
             page_index = len(self.base_page[i])-1
             record_offset = self.base_page[i][-1].num_records - 1
-            self.page_directory[rid] = (page_index,record_offset)
-            record = Record(rid, i, current_page)
+            page_positions.append((page_index, record_offset))
+            
+        self.page_directory[rid] = page_positions
+        primary_key_value = columns[self.key]
+        self.index.insert(primary_key_value, rid)
+        return rid
         
     def read_column(self,col_idx, page_idx, slot_idx):
         page = self.base_page[col_idx] [page_idx]

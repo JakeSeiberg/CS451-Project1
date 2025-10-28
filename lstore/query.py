@@ -36,7 +36,11 @@ class Query:
     """ #this one
     def insert(self, *columns):
         schema_encoding = '0' * self.table.num_columns
-        return
+        rid = self.table.insert_row(list(columns))
+        if rid is not None:
+            return True
+        else:
+            return False
 
     
     """
@@ -134,18 +138,18 @@ class Query:
         print(output)
         return output
 
-"""
+
 def main():
     test = Table("students", 2, 1)
-    test.insert_row([0, 123])
-    test.insert_row([1, 1000])
-    test.insert_row([2, 10000])
-    test.insert_row([3, 100000])
-    test.insert_row([4, 1000000])
     Qobj = Query(test)
+    Qobj.insert(0, 123)
+    Qobj.insert(1, 1000)
+    Qobj.insert(2, 10000)
+    Qobj.insert(3, 100000)
+    Qobj.insert(4, 1000000)
+    
     
     Qobj.sum(1,4,1)
     return True
 
 main()
-"""
