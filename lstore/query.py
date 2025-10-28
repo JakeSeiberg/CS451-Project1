@@ -137,19 +137,3 @@ class Query:
         
         print(output)
         return output
-
-
-def main():
-    test = Table("students", 2, 1)
-    Qobj = Query(test)
-    Qobj.insert(0, 123)
-    Qobj.insert(1, 1000)
-    Qobj.insert(2, 10000)
-    Qobj.insert(3, 100000)
-    Qobj.insert(4, 1000000)
-    
-    
-    Qobj.sum(1,4,1)
-    return True
-
-main()
