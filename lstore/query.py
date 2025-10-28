@@ -82,7 +82,55 @@ class Query:
     # Assume that select will never be called on a key that doesn't exist
     """
     def select_version(self, search_key, search_key_index, projected_columns_index, relative_version):
-        pass
+        rid = self.table.index.locate(search_key_index, search_key)
+        if (rid is None or rid not in self.table.page_directory):
+            return None
+        
+        record_values = []
+        actual_version = relative_version
+
+        if (relative_version < 0):
+            if (rid not in self.table.version_chain or len(self.table.version_chain[rid]) == 0):
+                actual_version = 0
+            else:
+                version_idx = -relative_version - 1
+                if (version_idx >= len(self.table.version_chain[rid])):
+                    version_idx = len(self.table.version_chain[rid]) - 1
+                    actual_version = -(version_idx + 1)
+    
+        for col_idx, is_projected in enumerate(projected_columns_index):
+            if (is_projected == 1):
+                if (actual_version == 0):
+                    page_index, record_offset = self.table.page_directory[rid][col_idx]
+                    value = self.table.read_column(col_idx, page_index, record_offset)
+                    record_values.append(value)
+                else:
+                    version_idx = -actual_version - 1
+                    tail_locations = self.table.version_chain[rid][version_idx]
+                    
+                    if (tail_locations[col_idx] is not None):
+                        page_index, record_offset = tail_locations[col_idx]
+                        page = self.table.tail_page[col_idx][page_index]
+                        value = page.read(record_offset)
+                        record_values.append(value)
+                    else:
+                        value = None
+                        for older_idx in range(version_idx + 1, len(self.table.version_chain[rid])):
+                            older_tail = self.table.version_chain[rid][older_idx]
+                            if (older_tail[col_idx] is not None):
+                                page_index, record_offset = older_tail[col_idx]
+                                page = self.table.tail_page[col_idx][page_index]
+                                value = page.read(record_offset)
+                                break
+                        if (value is None):
+                            page_index, record_offset = self.table.page_directory[rid][col_idx]
+                            value = self.table.read_column(col_idx, page_index, record_offset)
+                        
+                        record_values.append(value)
+            else:
+                record_values.append(None)
+        
+        return [Record(rid, search_key, record_values)]
 
     
     """
