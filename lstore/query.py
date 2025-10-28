@@ -21,12 +21,15 @@ class Query:
     # Return False if record doesn't exist or is locked due to 2PL
     """ #this one
     def delete(self, primary_key):
-        
-        if True:
-            self.table.page_directory[primary_key]
+        try:
+            rid = self.table.index.locate(self.table.key, primary_key)
+            if rid is None or rid not in self.table.page_directory:
+                return False
+            del self.table.page_directory[rid]
             return True
-        else:
+        except:
             return False
+    
     
     
     """
@@ -155,27 +158,22 @@ class Query:
     # this function is only called on the primary key.
     # Returns the summation of the given range upon success
     # Returns False if no record exists in the given range
-    """ #fix return False error handling (if empty record)
+    """
     
     def sum(self, start_range, end_range, aggregate_column_index):
         output = 0
         found = False
         rid_list = self.table.index.locate_range(start_range, end_range, self.table.key)
-        #print(f"DEBUG: Range [{start_range}, {end_range}], col={aggregate_column_index}, RIDs found: {rid_list}")
-        
         for rid in rid_list:
             if rid in self.table.page_directory:
-                # Get the primary key for this RID
                 pk_page_index, pk_record_offset = self.table.page_directory[rid][self.table.key]
                 pk_value = self.table.read_column(self.table.key, pk_page_index, pk_record_offset)
                 
                 page_index, record_offset = self.table.page_directory[rid][aggregate_column_index]
                 value = self.table.read_column(aggregate_column_index, page_index, record_offset)
-                #print(f"  RID {rid}: primary_key={pk_value}, column[{aggregate_column_index}]={value}")
                 output += value
                 found = True
 
-        #print(f"  Total sum: {output}")
         if not found:
             return False
         
