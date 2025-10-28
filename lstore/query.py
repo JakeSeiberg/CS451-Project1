@@ -142,17 +142,16 @@ class Query:
     def sum(self, start_range, end_range, aggregate_column_index):
         output = 0
         found = False
-
-        # Instead of range(start_range, end_range+1), iterate over actual RIDs
-        rids = [rid for rid in self.table.page_directory.keys()
-                if start_range <= rid <= end_range]
-
-        if not rids:
-            return False
-
-        for rid in rids:
+        for rid in range(start_range, end_range + 1):
+            if rid not in self.table.page_directory:
+                continue
+            found = True
+            
             page_index, record_offset = self.table.page_directory[rid][aggregate_column_index]
             value = self.table.read_column(aggregate_column_index, page_index, record_offset)
             output += value
 
+        if not found:
+            return False
+    
         return output
