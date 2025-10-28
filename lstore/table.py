@@ -30,6 +30,9 @@ class Table:
         self.index = Index(self)
         self.base_page = [[Page()] for _ in range(num_columns)]
         self.rid_counter = 0
+        
+        self.index = Index(self)
+        self.index.create_index(self.key)
 
     def insert_row(self, columns):
         rid = self.rid_counter + 1
@@ -49,7 +52,7 @@ class Table:
             
         self.page_directory[rid] = page_positions
         primary_key_value = columns[self.key]
-        self.index.insert(primary_key_value, rid)
+        self.index.insert(self.key, primary_key_value, rid)
         return rid
         
     def read_column(self,col_idx, page_idx, slot_idx):

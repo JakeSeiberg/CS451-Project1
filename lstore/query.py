@@ -53,7 +53,26 @@ class Query:
     # Assume that select will never be called on a key that doesn't exist
     """ #this one
     def select(self, search_key, search_key_index, projected_columns_index):
-        pass
+        # Locate the RID using the index
+        rid = self.table.index.locate(search_key_index, search_key)
+        if rid is None:
+            return []  # No matching record
+
+        # Retrieve the page positions for that RID
+        record_positions = self.table.page_directory[rid]
+        
+        # Read column values
+        record_values = []
+        for col_idx, (page_idx, slot_idx) in enumerate(record_positions):
+            if projected_columns_index[col_idx]:
+                value = self.table.read_column(col_idx, page_idx, slot_idx)
+                record_values.append(value)
+            else:
+                record_values.append(None)  # Optional: return None for non-projected columns
+
+        # Return as a list with a single Record
+        return [Record(rid, search_key, record_values)]
+
 
     
     """
@@ -123,17 +142,17 @@ class Query:
     def sum(self, start_range, end_range, aggregate_column_index):
         output = 0
         found = False
-        for rid in range(start_range, end_range + 1):
-            if rid not in self.table.page_directory:
-                continue
-            found = True
-            
-            page_index, record_offset = self.table.page_directory[rid]
+
+        # Instead of range(start_range, end_range+1), iterate over actual RIDs
+        rids = [rid for rid in self.table.page_directory.keys()
+                if start_range <= rid <= end_range]
+
+        if not rids:
+            return False
+
+        for rid in rids:
+            page_index, record_offset = self.table.page_directory[rid][aggregate_column_index]
             value = self.table.read_column(aggregate_column_index, page_index, record_offset)
             output += value
 
-        if not found:
-            return False
-        
-        print(output)
         return output

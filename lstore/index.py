@@ -15,7 +15,7 @@ class Index:
     def locate(self, column, value):
         tree = self.indices[column]
 
-        return tree.locate(value)
+        return tree.locate(value)[0]
 
 
     """
@@ -37,6 +37,12 @@ class Index:
             for rid, (page_idx, slot_idx) in self.table.page_directory.items():
                 value = self.table.read_column(column_number, page_idx, slot_idx)
                 self.indices[column_number].insert(value, rid)
+                
+    def insert(self, column_number, value, rid):
+        """Insert a (value, rid) pair into the column’s index (if it exists)."""
+        tree = self.indices[column_number]
+        if tree is not None:
+            tree.insert(value, rid)
 
     """
     # optional: Drop index of specific column
