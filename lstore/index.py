@@ -5,37 +5,45 @@ class Index:
 
     def __init__(self, table):
         # One index for each table. All our empty initially.
+        self.table = table
         self.indices = [None] *  table.num_columns
-
-        pass
 
     """
     # returns the location of all records with the given value on column "column"
     """
 
     def locate(self, column, value):
-        pass
+        tree = self.indices[column]
+
+        return tree.locate(value)
+
 
     """
     # Returns the RIDs of all records with values in column "column" between "begin" and "end"
     """
 
     def locate_range(self, begin, end, column):
-        pass
+        tree = self.indices[column]
+
+        return tree.locate_range(begin, end)
 
     """
     # optional: Create index on specific column
     """
 
     def create_index(self, column_number):
-        pass
+        if (self.indices[column_number] is None):
+            self.indices[column_number] = BPlusTree(order=4)
+            for rid, (page_idx, slot_idx) in self.table.page_directory.items():
+                value = self.table.read_column(column_number, page_idx, slot_idx)
+                self.indices[column_number].insert(value, rid)
 
     """
     # optional: Drop index of specific column
     """
 
     def drop_index(self, column_number):
-        pass
+        self.indices[column_number] = None
 
 class BPlusTree:
     def __init__(self, order=4):
