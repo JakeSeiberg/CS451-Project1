@@ -122,7 +122,7 @@ class BPlusTree:
         node = self.root
         while not node.is_leaf:
             i = 0
-            while i < len(node.keys) and start >= node.keys[i]:
+            while i < len(node.keys) and start > node.keys[i]:
                 i += 1
             node = node.children[i]
 

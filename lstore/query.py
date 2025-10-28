@@ -95,7 +95,24 @@ class Query:
     # Returns False if no records exist with given key or if the target record cannot be accessed due to 2PL locking
     """ #this one
     def update(self, primary_key, *columns):
-        pass
+    # Find the RID for this primary key
+        rid = self.table.index.locate(self.table.key, primary_key)
+        if rid is None or rid not in self.table.page_directory:
+            return False
+        
+        # Get the record positions
+        record_positions = self.table.page_directory[rid]
+        
+        # Update each column that isn't None
+        for col_idx, new_value in enumerate(columns):
+            if new_value is not None:
+                page_idx, slot_idx = record_positions[col_idx]
+                page = self.table.base_page[col_idx][page_idx]
+                # Write the new value to the page
+                offset = slot_idx * 8
+                page.data[offset:offset + 8] = new_value.to_bytes(8, byteorder='little', signed=True)
+        
+        return True
 
     
 
@@ -139,18 +156,27 @@ class Query:
     # Returns the summation of the given range upon success
     # Returns False if no record exists in the given range
     """ #fix return False error handling (if empty record)
+    
     def sum(self, start_range, end_range, aggregate_column_index):
         output = 0
         found = False
         rid_list = self.table.index.locate_range(start_range, end_range, self.table.key)
+        #print(f"DEBUG: Range [{start_range}, {end_range}], col={aggregate_column_index}, RIDs found: {rid_list}")
+        
         for rid in rid_list:
             if rid in self.table.page_directory:
+                # Get the primary key for this RID
+                pk_page_index, pk_record_offset = self.table.page_directory[rid][self.table.key]
+                pk_value = self.table.read_column(self.table.key, pk_page_index, pk_record_offset)
+                
                 page_index, record_offset = self.table.page_directory[rid][aggregate_column_index]
                 value = self.table.read_column(aggregate_column_index, page_index, record_offset)
+                #print(f"  RID {rid}: primary_key={pk_value}, column[{aggregate_column_index}]={value}")
                 output += value
                 found = True
 
+        #print(f"  Total sum: {output}")
         if not found:
             return False
-    
+        
         return output
