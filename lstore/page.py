@@ -5,11 +5,11 @@ class Page:
         self.num_records = 0
         self.data = bytearray(4096)
 
-    def has_capacity(self, num):
+    def has_capacity(self):
         return self.num_records < 512
 
     def write(self, value):
-        if self.has_capacity(self.num_records):
+        if self.has_capacity():
             offset = self.num_records * 8
             self.data[offset:offset + 8] = value.to_bytes(8, byteorder='little', signed=True)
             self.num_records += 1

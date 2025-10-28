@@ -78,12 +78,12 @@ class BPlusTree:
             node.keys.insert(idx, (key,rid))
         else:
             i = 0
-            while (i < len(node.keys) and key >= node.keys[i]):
+            while (i < len(node.keys) and key > node.keys[i]):
                 i += 1
             
             if len(node.children[i].keys) == self.order - 1:
                 self._split_child(node, i)
-                if key >= node.keys[i]:
+                if key > node.keys[i]:
                     i += 1
 
             self.insert_non_full(node.children[i], key, rid)

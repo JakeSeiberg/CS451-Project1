@@ -40,7 +40,7 @@ class Table:
    
         for i, value in enumerate(columns):
             current_page = self.base_page[i][-1]
-            if not current_page.has_capacity:
+            if not current_page.has_capacity():
                 new_page = Page()
                 self.base_page[i].append(new_page)
                 current_page = new_page
