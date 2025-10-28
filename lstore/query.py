@@ -19,7 +19,7 @@ class Query:
     # Read a record with specified RID
     # Returns True upon succesful deletion
     # Return False if record doesn't exist or is locked due to 2PL
-    """ #this one
+    """
     def delete(self, primary_key):
         try:
             rid = self.table.index.locate(self.table.key, primary_key)
@@ -36,7 +36,7 @@ class Query:
     # Insert a record with specified columns
     # Return True upon succesful insertion
     # Returns False if insert fails for whatever reason
-    """ #this one
+    """
     def insert(self, *columns):
         schema_encoding = '0' * self.table.num_columns
         rid = self.table.insert_row(list(columns))
@@ -54,26 +54,19 @@ class Query:
     # Returns a list of Record objects upon success
     # Returns False if record locked by TPL
     # Assume that select will never be called on a key that doesn't exist
-    """ #this one
+    """
     def select(self, search_key, search_key_index, projected_columns_index):
-        # Locate the RID using the index
         rid = self.table.index.locate(search_key_index, search_key)
         if rid is None:
-            return []  # No matching record
-
-        # Retrieve the page positions for that RID
-        record_positions = self.table.page_directory[rid]
-        
-        # Read column values
+            return []
+        locations = self.table.page_directory[rid]
         record_values = []
-        for col_idx, (page_idx, slot_idx) in enumerate(record_positions):
+        for col_idx, (page_idx, slot_idx) in enumerate(locations):
             if projected_columns_index[col_idx]:
                 value = self.table.read_column(col_idx, page_idx, slot_idx)
                 record_values.append(value)
             else:
-                record_values.append(None)  # Optional: return None for non-projected columns
-
-        # Return as a list with a single Record
+                record_values.append(None)
         return [Record(rid, search_key, record_values)]
 
 
@@ -87,7 +80,7 @@ class Query:
     # Returns a list of Record objects upon success
     # Returns False if record locked by TPL
     # Assume that select will never be called on a key that doesn't exist
-    """ #maybe this one
+    """
     def select_version(self, search_key, search_key_index, projected_columns_index, relative_version):
         pass
 
@@ -96,23 +89,17 @@ class Query:
     # Update a record with specified key and columns
     # Returns True if update is succesful
     # Returns False if no records exist with given key or if the target record cannot be accessed due to 2PL locking
-    """ #this one
+    """
     def update(self, primary_key, *columns):
-    # Find the RID for this primary key
         rid = self.table.index.locate(self.table.key, primary_key)
         if rid is None or rid not in self.table.page_directory:
             return False
-        
-        # Get the record positions
-        record_positions = self.table.page_directory[rid]
-        
-        # Update each column that isn't None
+        locations = self.table.page_directory[rid]
         for col_idx, new_value in enumerate(columns):
             if new_value is not None:
-                page_idx, slot_idx = record_positions[col_idx]
-                page = self.table.base_page[col_idx][page_idx]
-                # Write the new value to the page
+                page_idx, slot_idx = locations[col_idx]
                 offset = slot_idx * 8
+                page = self.table.base_page[col_idx][page_idx]
                 page.data[offset:offset + 8] = new_value.to_bytes(8, byteorder='little', signed=True)
         
         return True
@@ -166,9 +153,6 @@ class Query:
         rid_list = self.table.index.locate_range(start_range, end_range, self.table.key)
         for rid in rid_list:
             if rid in self.table.page_directory:
-                pk_page_index, pk_record_offset = self.table.page_directory[rid][self.table.key]
-                pk_value = self.table.read_column(self.table.key, pk_page_index, pk_record_offset)
-                
                 page_index, record_offset = self.table.page_directory[rid][aggregate_column_index]
                 value = self.table.read_column(aggregate_column_index, page_index, record_offset)
                 output += value
