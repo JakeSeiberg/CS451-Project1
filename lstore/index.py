@@ -14,8 +14,8 @@ class Index:
 
     def locate(self, column, value):
         tree = self.indices[column]
-
-        return tree.locate(value)[0]
+        result = tree.locate(value)
+        return result[0] if result else None
 
 
     """

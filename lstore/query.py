@@ -39,8 +39,14 @@ class Query:
     # Returns False if insert fails for whatever reason
     """
     def insert(self, *columns):
-        schema_encoding = '0' * self.table.num_columns
+        primary_key = columns[self.table.key]
+        existing_rid = self.table.index.locate(self.table.key, primary_key)
+
+        if existing_rid is not None:
+            return False
+        
         rid = self.table.insert_row(list(columns))
+        
         if rid is not None:
             return True
         else:
@@ -143,6 +149,14 @@ class Query:
         rid = self.table.index.locate(self.table.key, primary_key)
         if rid is None or rid not in self.table.page_directory:
             return False
+        
+        if columns[self.table.key] is not None:
+            new_primary_key = columns[self.table.key]
+            if new_primary_key != primary_key:  # Only check if actually changing the key
+                existing_rid = self.table.index.locate(self.table.key, new_primary_key)
+                if existing_rid is not None:
+                    return False
+        
         old_locations = self.table.page_directory[rid]
         tail_locations = [None] * self.table.num_columns
         for col_idx, new_value in enumerate(columns):
