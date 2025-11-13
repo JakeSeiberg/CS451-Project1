@@ -1,4 +1,3 @@
-
 import math
 
 class Index:
@@ -34,12 +33,15 @@ class Index:
     def create_index(self, column_number):
         if (self.indices[column_number] is None):
             self.indices[column_number] = BPlusTree(order=4)
-            for rid, (page_idx, slot_idx) in self.table.page_directory.items():
+            # page_directory maps: rid -> list of (page_idx, slot_idx) for each column
+            for rid, positions in self.table.page_directory.items():
+                # Get the position for this specific column
+                page_idx, slot_idx = positions[column_number]
                 value = self.table.read_column(column_number, page_idx, slot_idx)
                 self.indices[column_number].insert(value, rid)
                 
     def insert(self, column_number, value, rid):
-        """Insert a (value, rid) pair into the column’s index (if it exists)."""
+        """Insert a (value, rid) pair into the column's index (if it exists)."""
         tree = self.indices[column_number]
         if tree is not None:
             tree.insert(value, rid)
@@ -146,4 +148,3 @@ class Node:
         self.children = []
         self.is_leaf = True
         self.next = None
-        
