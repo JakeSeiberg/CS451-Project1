@@ -1,4 +1,5 @@
 from lstore.table import Table
+from lstore.page import Page
 import os
 import struct
 
@@ -42,13 +43,13 @@ class Database():
         if not os.path.exists(table_path):
             return
         
-        for col_idx in range(table.num_columns):
-            base_dir = os.path.join(table_path, f'base_col_{col_idx}')
-            table.base_page[col_idx] = self.load_pages(base_dir)
+        for idx in range(table.num_columns):
+            base_dir = os.path.join(table_path, f'base_col_{idx}')
+            table.base_page[idx] = self.load_pages(base_dir)
         
-        for col_idx in range(table.num_columns):
-            tail_dir = os.path.join(table_path, f'tail_col_{col_idx}')
-            table.tail_page[col_idx] = self.load_pages(tail_dir)
+        for idx in range(table.num_columns):
+            tail_dir = os.path.join(table_path, f'tail_col_{idx}')
+            table.tail_page[idx] = self.load_pages(tail_dir)
         
 
         self.load_page_directory(table_path, table)
@@ -58,14 +59,13 @@ class Database():
         table.index.create_index(table.key)
 
     def get_page_number(self, filename):
-        after_underscore = filename.split('_')[1] 
-        before_dot = after_underscore.split('.')[0]
+        underscore = filename.split('_')[1] 
+        dot = underscore.split('.')[0]
         
-        return int(before_dot)
+        return int(dot)
 
     def load_pages(self, directory):
         """Load all pages from a directory"""
-        from lstore.page import Page
         
         if not os.path.exists(directory):
             return [Page()]
@@ -134,7 +134,7 @@ class Database():
                 
                 for j in range(num_versions):
                     tail_locations = []
-                    for col_idx in range(table.num_columns):
+                    for col in range(table.num_columns):
                         has_location = struct.unpack('?', f.read(1))[0]
                         if has_location:
                             page_idx = struct.unpack('i', f.read(4))[0]
@@ -179,13 +179,13 @@ class Database():
         if not os.path.exists(table_path):
             os.makedirs(table_path)
         
-        for col_idx in range(table.num_columns):
-            base_dir = os.path.join(table_path, f'base_col_{col_idx}')
-            self.save_pages(base_dir, table.base_page[col_idx])
+        for idx in range(table.num_columns):
+            base_dir = os.path.join(table_path, f'base_col_{idx}')
+            self.save_pages(base_dir, table.base_page[idx])
         
-        for col_idx in range(table.num_columns):
-            tail_dir = os.path.join(table_path, f'tail_col_{col_idx}')
-            self.save_pages(tail_dir, table.tail_page[col_idx])
+        for idx in range(table.num_columns):
+            tail_dir = os.path.join(table_path, f'tail_col_{idx}')
+            self.save_pages(tail_dir, table.tail_page[idx])
         
         self.save_page_directory(table_path, table)
         self.save_version_chains(table_path, table)
@@ -195,8 +195,8 @@ class Database():
         if not os.path.exists(directory):
             os.makedirs(directory)
         
-        for page_idx, page in enumerate(pages):
-            page_path = os.path.join(directory, f'page_{page_idx}.dat')
+        for idx, page in enumerate(pages):
+            page_path = os.path.join(directory, f'page_{idx}.dat')
             with open(page_path, 'wb') as f:
                 f.write(struct.pack('i', page.num_records))
                 f.write(page.data)
@@ -236,22 +236,22 @@ class Database():
                         else:
                             f.write(struct.pack('?', False))
 
-    """
-    # Creates a new table
-    :param name: string         #Table name
-    :param num_columns: int     #Number of Columns: all columns are integer
-    :param key: int             #Index of table key in columns
-    """
+   
     def create_table(self, name, num_columns, key_index):
+        """
+        Creates a new table
+        :param name: string
+        :param num_columns: int
+        :param key: int
+        """
         table = Table(name, num_columns, key_index)
         self.tables.append(table)
         return table
 
     
-    """
-    # Deletes the specified table
-    """
+    
     def drop_table(self, name):
+        """Deletes the specified table"""
         for table in self.tables:
             if table.name == name:
                 self.tables.remove(table)
@@ -261,10 +261,9 @@ class Database():
         return -1
 
     
-    """
-    # Returns table with the passed name
-    """
+   
     def get_table(self, name):
+        """ Returns table with the passed name """
         for table in self.tables:
             if table.name == name:
                 print("table was found")
