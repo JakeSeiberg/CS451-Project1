@@ -61,7 +61,6 @@ class Table:
         return page.read(slot_idx)
         
 
-    def __merge(self):
-        print("merge is happening")
+    def merge(self):
         pass
  

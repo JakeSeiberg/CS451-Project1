@@ -260,7 +260,6 @@ class Database():
         print("table not found")
         return -1
 
-    
    
     def get_table(self, name):
         """ Returns table with the passed name """
